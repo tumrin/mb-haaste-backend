@@ -1,6 +1,6 @@
-import { migrate } from 'drizzle-orm/postgres-js/migrator'
-import { join, dirname } from 'node:path'
+import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { migrate } from 'drizzle-orm/postgres-js/migrator'
 
 import app from './app.ts'
 import config from './config.ts'

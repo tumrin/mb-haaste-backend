@@ -17,13 +17,13 @@ router.get('/ping', (_req, res) => {
 // Quick and dirty session management..
 router.use((_req, res, next) => {
   const id = getCompanyId()
-  if(id !== null) res.locals.companyId = id;
+  if (id !== null) res.locals.companyId = id
   next()
 })
 
 router.post('/login', (req, res) => {
   const companyId = Number(req.body.companyId)
-  if(!companyId) return res.status(400).json({ message: 'companyId is required' })
+  if (!companyId) return res.status(400).json({ message: 'companyId is required' })
   setCompanyId(companyId)
   res.locals.companyId = companyId
   return res.json({ message: 'Logged in', companyId })
@@ -36,9 +36,9 @@ router.get('/companies', requireSession, async (_req, res) => {
   return res.json(companies)
 })
 
-router.get('/companies/:id', requireSession, async (req, res) => {
+router.get('/companies/:id', requireSession, async (_req, res) => {
   const row = await findCompanyById(res.locals.companyId)
-  if(!row) return res.status(404).json({ message: 'Company not found' })
+  if (!row) return res.status(404).json({ message: 'Company not found' })
   return res.json(row)
 })
 
@@ -50,10 +50,9 @@ router.get('/customers', requireSession, async (_req, res) => {
 router.get('/customers/:id', requireSession, async (req, res) => {
   const id = Number(req.params.id)
   const row = await findCustomerById(id, res.locals.companyId)
-  if(!row) return res.status(404).json({ message: 'Customer not found' })
+  if (!row) return res.status(404).json({ message: 'Customer not found' })
   return res.json(row)
 })
-
 
 /**
 /* MB-TODO: Implement `customer` create/update/delete endpoints.
