@@ -4,6 +4,7 @@ import { NotFound } from './errorHandler.ts'
 import { findAllCompanies, findCompanyById } from './models/company.ts'
 import { createCustomer, deleteCustomerById, findAllCustomers, findCustomerById, updateCustomerById } from './models/customer.ts'
 import { createEmployee, deleteEmployeeById, findAllEmployees, updateEmployeeById } from './models/employee.ts'
+import { generateReport } from './models/report.ts'
 import { createState, findAllStates } from './models/state.ts'
 import { assignEmployeeTask, createEmployeeTask, createTask, findAllTasks, findEmployeeTasks } from './models/task.ts'
 import { getCompanyId, requireSession, setCompanyId } from './session.ts'
@@ -180,6 +181,10 @@ router.post('/tasks/employee/:employeeId', requireSession, async (req, res) => {
   return res.json(row)
 })
 
+// Report
+router.get('/report', requireSession, async (_req, res) => {
+  const report = await generateReport(res.locals.companyId)
+  return res.json(report)
 })
 
 export default router
