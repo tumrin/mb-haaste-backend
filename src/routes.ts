@@ -1,7 +1,11 @@
 import { Router } from 'express'
-import { CustomerInsertSchema, CustomerUpdateSchema } from './db/schema.ts'
+import { CustomerInsertSchema, CustomerUpdateSchema, EmployeeInsertSchema, EmployeeUpdateSchema, StateInsertSchema, TaskInsertSchema } from './db/schema.ts'
+import { NotFound } from './errorHandler.ts'
 import { findAllCompanies, findCompanyById } from './models/company.ts'
 import { createCustomer, deleteCustomerById, findAllCustomers, findCustomerById, updateCustomerById } from './models/customer.ts'
+import { createEmployee, deleteEmployeeById, findAllEmployees, updateEmployeeById } from './models/employee.ts'
+import { createState, findAllStates } from './models/state.ts'
+import { assignEmployeeTask, createEmployeeTask, createTask, findAllTasks, findEmployeeTasks } from './models/task.ts'
 import { getCompanyId, requireSession, setCompanyId } from './session.ts'
 
 const router = Router()
@@ -64,6 +68,7 @@ router.post('/customers', requireSession, async (req, res) => {
   if (!row) throw Error('Failed to create customer')
   return res.json(row)
 })
+
 router.put('/customers', requireSession, async (req, res) => {
   const customer = CustomerUpdateSchema.parse(req.body)
   const row = await updateCustomerById(customer, res.locals.companyId)
@@ -100,5 +105,81 @@ router.delete('/customers/:id', requireSession, async (req, res) => {
  *    - "Important Report": list customers and count of their "Open" tasks which have been created within last 30 days and task's employee is not disabled. Sort results by count.
  */
 
-export default router
+// Employees
+router.get('/employees', requireSession, async (_req, res) => {
+  const rows = await findAllEmployees(res.locals.companyId)
+  return res.json(rows)
+})
 
+router.post('/employees', requireSession, async (req, res) => {
+  const employee = EmployeeInsertSchema.parse(req.body)
+  const row = await createEmployee(employee, res.locals.companyId)
+  if (!row) throw Error('Failed to create employee')
+  return res.json(row)
+})
+
+router.put('/employees', requireSession, async (req, res) => {
+  const employee = EmployeeUpdateSchema.parse(req.body)
+  const row = await updateEmployeeById(employee, res.locals.companyId)
+  if (!row) throw new NotFound('Employee not found')
+  return res.json(row)
+})
+
+router.delete('/employees/:id', requireSession, async (req, res) => {
+  const id = Number(req.params.id)
+  const row = await deleteEmployeeById(id, res.locals.companyId)
+  if (!row) throw new NotFound('Employee not found')
+  return res.json(row)
+})
+
+// States
+router.get('/states', requireSession, async (_req, res) => {
+  const states = await findAllStates(res.locals.companyId)
+  return res.json(states)
+})
+
+router.post('/states', requireSession, async (req, res) => {
+  const state = StateInsertSchema.parse(req.body)
+  const row = await createState(state, res.locals.companyId)
+  if (!row) throw Error('Failed to create state')
+  return res.json(row)
+})
+
+// Tasks
+router.get('/tasks', requireSession, async (_req, res) => {
+  const tasks = await findAllTasks(res.locals.companyId)
+  return res.json(tasks)
+})
+
+router.post('/tasks', requireSession, async (req, res) => {
+  const task = TaskInsertSchema.parse(req.body)
+  const row = await createTask(task, res.locals.companyId)
+  if (!row) throw Error('Failed to create task')
+  return res.json(row)
+})
+
+router.get('/tasks/employee/:employeeId', requireSession, async (req, res) => {
+  const id = Number(req.params.employeeId)
+  const tasks = await findEmployeeTasks(id, res.locals.companyId)
+  return res.json(tasks)
+})
+
+router.post('/tasks/employee/:employeeId/:taskId', requireSession, async (req, res) => {
+  const taskId = Number(req.params.taskId)
+  const employeeId = Number(req.params.employeeId)
+  const row = await assignEmployeeTask(taskId, employeeId, res.locals.companyId)
+  if (!row) throw Error('Failed to assign task')
+  return res.json(row)
+})
+
+router.post('/tasks/employee/:employeeId', requireSession, async (req, res) => {
+  const task = TaskInsertSchema.parse(req.body)
+  const employeeId = Number(req.params.employeeId)
+  const row = await createEmployeeTask(employeeId, task, res.locals.companyId)
+  if (!row) throw Error('Failed to create task')
+  return res.json(row)
+})
+
+})
+
+export default router

@@ -19,6 +19,15 @@ export class NotFound extends Error {
   }
 }
 
+export class AlreadyExists extends Error {
+  status: number
+  constructor(message?: string) {
+    super(message || 'Conflict')
+    this.name = 'Conflict'
+    this.status = 409
+  }
+}
+
 const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   if (err instanceof ZodError) {
     res.status(400)
