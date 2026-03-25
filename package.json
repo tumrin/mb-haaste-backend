@@ -5,12 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "node --watch ./src/index.ts",
+    "check": "biome check",
     "db:generate": "drizzle-kit generate --custom --name",
     "db:drop": "docker exec -it mb-haaste-backend-app-1 npx drizzle-kit drop",
     "db:migrate": "docker exec -it mb-haaste-backend-app-1 npx drizzle-kit migrate",
     "db:open": "docker exec -it mb-haaste-backend-db-1 psql -U postgres app"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.4.8",
     "@types/express": "^5.0.6",
     "@types/morgan": "^1.9.10",
     "@types/node": "^25.5.0",
