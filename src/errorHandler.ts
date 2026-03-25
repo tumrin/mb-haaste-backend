@@ -1,5 +1,6 @@
+import type { ErrorRequestHandler } from 'express'
+import { ZodError } from 'zod'
 import config from './config.ts'
-import type { ErrorRequestHandler } from 'express';
 
 export class NotImplemented extends Error {
   status: number
@@ -19,6 +20,10 @@ export class NotFound extends Error {
 }
 
 const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
+  if (err instanceof ZodError) {
+    res.status(400)
+    return res.send({ message: JSON.parse(err.message) })
+  }
   res.status(err.status || 500)
   if (config.nodeEnv !== 'production' && res.statusCode >= 500) {
     console.error(err)

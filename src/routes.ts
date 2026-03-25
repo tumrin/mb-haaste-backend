@@ -1,10 +1,8 @@
 import { Router } from 'express'
-
+import { CustomerInsertSchema, CustomerUpdateSchema } from './db/schema.ts'
 import { findAllCompanies, findCompanyById } from './models/company.ts'
-import { findAllCustomers, findCustomerById } from './models/customer.ts'
-import { getCompanyId, setCompanyId } from './session.ts'
-import { requireSession } from './session.ts'
-import { NotImplemented } from './errorHandler.ts'
+import { createCustomer, deleteCustomerById, findAllCustomers, findCustomerById, updateCustomerById } from './models/customer.ts'
+import { getCompanyId, requireSession, setCompanyId } from './session.ts'
 
 const router = Router()
 
@@ -60,8 +58,24 @@ router.get('/customers/:id', requireSession, async (req, res) => {
 /*  - How would you decorate response data?
 /* Example of "create" request:
  */
-router.put('/customers', requireSession, async (_req, res) => {
-  throw new NotImplemented()
+router.post('/customers', requireSession, async (req, res) => {
+  const customer = CustomerInsertSchema.parse(req.body)
+  const row = await createCustomer(customer, res.locals.companyId)
+  if (!row) throw Error('Failed to create customer')
+  return res.json(row)
+})
+router.put('/customers', requireSession, async (req, res) => {
+  const customer = CustomerUpdateSchema.parse(req.body)
+  const row = await updateCustomerById(customer, res.locals.companyId)
+  if (!row) throw new NotFound('Customer not found')
+  return res.json(row)
+})
+
+router.delete('/customers/:id', requireSession, async (req, res) => {
+  const id = Number(req.params.id)
+  const row = await deleteCustomerById(id, res.locals.companyId)
+  if (!row) throw new NotFound('Customer not found')
+  return res.json(row)
 })
 
 /**
